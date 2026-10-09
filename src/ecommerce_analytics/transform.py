@@ -63,7 +63,10 @@ def sessionize(events: DataFrame, session_minutes: int = 30) -> DataFrame:
     previous = F.lag("event_timestamp").over(order)
     boundary = F.when(
         previous.isNull()
-        | ((F.col("event_timestamp").cast("long") - previous.cast("long")) > session_minutes * 60),
+        | (
+            (F.unix_micros("event_timestamp") - F.unix_micros(previous))
+            > session_minutes * 60 * 1_000_000
+        ),
         1,
     ).otherwise(0)
     numbered = events.withColumn("_new_session", boundary).withColumn(

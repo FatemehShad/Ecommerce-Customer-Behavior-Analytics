@@ -4,7 +4,10 @@
 # MAGIC Install the project wheel on a compatible Spark 4.0 / Delta 4.0 cluster with
 # MAGIC `pip install --no-deps /Volumes/<catalog>/<schema>/<volume>/<wheel>.whl`.
 # MAGIC The cluster provides PySpark and Delta: do not replace its runtime packages.
-# MAGIC Upload a CSV to a Unity Catalog Volume and choose a distinct writable output directory.
+# MAGIC Upload Retailrocket's `events.csv` from
+# MAGIC https://www.kaggle.com/datasets/retailrocket/ecommerce-dataset to a Unity Catalog Volume.
+# MAGIC Choose a distinct writable output directory. Item properties/categories are optional
+# MAGIC enrichments and are not ingested by this event-only pipeline.
 
 # COMMAND ----------
 dbutils.widgets.text("input_path", "/Volumes/main/analytics/events/events.csv")  # noqa: F821

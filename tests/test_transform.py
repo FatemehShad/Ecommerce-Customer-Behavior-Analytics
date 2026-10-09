@@ -46,7 +46,11 @@ def test_session_boundary_and_stable_ids(spark):
     raw = spark.createDataFrame(
         [
             (time, "u", "view", "p")
-            for time in ["2025-01-01T00:00:00Z", "2025-01-01T00:30:00Z", "2025-01-01T01:00:01Z"]
+            for time in [
+                "2025-01-01T00:00:00.123Z",
+                "2025-01-01T00:30:00.123Z",
+                "2025-01-01T01:00:00.124Z",
+            ]
         ],
         "timestamp string, visitorid string, event string, itemid string",
     )

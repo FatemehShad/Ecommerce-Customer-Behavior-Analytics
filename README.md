@@ -5,9 +5,10 @@ product interactions, and conversion funnels at millions-of-events scale. Pytest
 transformation contracts and actual Delta writes; GitHub Actions runs those checks on pushes
 and pull requests.
 
-**Data provenance:** no original customer dataset was supplied. Included generation produces
-synthetic events, not measured business results. A 2.7-million-event synthetic benchmark can
-exercise the pipeline; use your real dataset before reporting real customer insights.
+**Input dataset:** [Retailrocket recommender system dataset on Kaggle](https://www.kaggle.com/datasets/retailrocket/ecommerce-dataset).
+The analytics pipeline uses its `events.csv`, containing approximately 2.7 million customer
+interactions. Download and run that file using the instructions below. Generated demo data
+is synthetic and separate from Retailrocket; the initial local benchmark used synthetic data.
 See [the local validation record](docs/validation.md) for the tested workload and its limits.
 
 ```mermaid
@@ -57,7 +58,7 @@ leave outputs from different runs, so consume results only after successful comp
 ## Input contract
 
 CSV files require a header. A file, directory, or Spark-supported glob can be supplied.
-The schema follows [Retailrocket e-commerce events](https://www.kaggle.com/datasets/retailrocket/ecommerce-dataset):
+The input schema is Retailrocket's `events.csv`:
 
 | Field | Meaning |
 | --- | --- |
@@ -74,9 +75,39 @@ and transaction ID. Legitimate identical events at the same timestamp cannot be 
 without a source event identifier. Purchase events are item interactions, not distinct orders.
 No prices or quantities are available, so this project does not calculate revenue or AOV.
 
-Download real data separately and comply with its license. The pipeline needs only `events.csv`;
-item property and category files are optional future enrichments. No Kaggle credentials are
-needed to run synthetic examples or tests.
+## Download and run Retailrocket
+
+```bash
+ecommerce-analytics download-retailrocket --output data/retailrocket/events.csv
+export PYSPARK_SUBMIT_ARGS='--driver-memory 4g pyspark-shell'
+ecommerce-analytics run --input data/retailrocket/events.csv \
+  --output output/retailrocket --master 'local[4]' --shuffle-partitions 16
+python scripts/validate_outputs.py --output output/retailrocket
+```
+
+The downloader targets only `events.csv` using Kaggle's public dataset endpoint, accepts CSV
+or ZIP responses, validates the five-column header, and prints the source URL, file size,
+and CSV SHA-256 for your provenance record. It retains HTTPS verification and refuses to
+overwrite existing input. Download availability depends on Kaggle's current access rules.
+If authentication or network restrictions prevent it, download from the linked dataset page,
+unzip it locally, and place `events.csv` at `data/retailrocket/events.csv` before the run command.
+Do not paste Kaggle credentials into code or chat.
+
+Cloud network access needs `www.kaggle.com` and `storage.googleapis.com` for Kaggle and its
+download storage. These additions have been saved in the environment draft; they must be
+applied through environment settings before the blocked cloud download can be retried.
+The initial attempt returned a proxy policy rejection, so real-data results are not yet
+reported in this repository. Synthetic examples and offline tests require no Kaggle access.
+
+The archive also includes `item_properties_part1.csv`, `item_properties_part2.csv`, and
+`category_tree.csv`. They are optional enrichment sources and are not read by this event
+analytics pipeline. `visitorid` identifies an anonymous visitor, not a verified customer
+account; session and customer labels here describe observed visitor behaviour. Transaction
+IDs occur on purchase events; blank transaction IDs on views/carts are expected. The anonymized
+item-property files do not supply usable order revenue for this implementation.
+
+Use the dataset under the terms and license on its Kaggle page. Raw customer interaction
+data, downloaded archives, and derived Delta outputs remain Git-ignored.
 
 ## Analytics definitions and Delta tables
 

@@ -2,6 +2,8 @@
 
 Validated on 9 October 2026 with Python 3.12.14, Java 21, PySpark 4.0.1, and Delta Lake 4.0.1.
 
+## Initial synthetic workload
+
 | Check | Observed result |
 | --- | --- |
 | `ruff check .` | Passed |
@@ -19,8 +21,11 @@ partitions. It completed the entire bronze/silver/gold pipeline. The test fixtur
 exercises bad data, duplicates, and incorrect funnel ordering; the clean benchmark is not a
 substitute for those checks.
 
-These are **synthetic** local validation results. No original customer dataset was supplied,
-and no real customer behaviour or revenue findings are claimed. The Databricks notebook uses
+These are **synthetic** local validation results from the initial implementation. The user
+subsequently identified the source as the Retailrocket recommender system dataset on Kaggle.
+Downloading its `events.csv` in this environment is currently blocked by the network proxy;
+the required Kaggle/storage domains have been saved in the environment configuration draft.
+No real Retailrocket customer behaviour or revenue findings are claimed. The Databricks notebook uses
 the same Python transformations, but execution in a Databricks workspace was not tested.
 GitHub Actions is configured; this record does not assert a completed hosted CI run.
 
@@ -28,3 +33,18 @@ Reproduce the full workload with the commands in README.md. Run
 `python scripts/validate_outputs.py --output output/synthetic-2700000 --expected-valid-rows 2700000`
 to verify curated quality, reconcile session counts, check funnel stage consistency, and
 execute all three SQL analysis examples against the generated Delta tables.
+
+## Retailrocket integration
+
+After the dataset-specific updates, `ruff check .` passed and the complete Pytest suite
+reported **11 passed, zero failed or skipped**.
+
+The project now explicitly targets Kaggle's `retailrocket/ecommerce-dataset` and downloads
+only `events.csv`. Download handling is checked using simulated raw CSV and ZIP responses,
+header rejection, preservation of existing files, and reproducible SHA-256 calculation.
+These offline tests do not establish successful download from Kaggle.
+
+The session boundary calculation now retains timestamp precision: exactly 30 minutes stays
+in a session, while 30 minutes plus one millisecond starts another. The regression fixture
+checks both cases. Real-data execution remains pending network access to `www.kaggle.com`
+and Kaggle download storage at `storage.googleapis.com`.

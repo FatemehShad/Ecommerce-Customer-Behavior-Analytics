@@ -2,6 +2,8 @@
 
 import argparse
 import json
+from pathlib import Path
+from urllib.error import HTTPError, URLError
 
 from ecommerce_analytics.demo import generate_events
 
@@ -13,6 +15,8 @@ def main() -> None:
     generate.add_argument("--output", required=True)
     generate.add_argument("--rows", type=int, default=10000)
     generate.add_argument("--seed", type=int, default=42)
+    download = commands.add_parser("download-retailrocket", help="Download Kaggle's events.csv")
+    download.add_argument("--output", type=Path, required=True)
     run = commands.add_parser("run", help="Run a full-refresh Delta Lake pipeline")
     run.add_argument("--input", required=True)
     run.add_argument("--output", required=True)
@@ -20,6 +24,20 @@ def main() -> None:
     run.add_argument("--master", default="local[2]")
     run.add_argument("--shuffle-partitions", type=int, default=8)
     args = parser.parse_args()
+    if args.command == "download-retailrocket":
+        from ecommerce_analytics.retailrocket import download_events
+
+        try:
+            print(json.dumps(download_events(args.output), sort_keys=True))
+        except HTTPError as error:
+            parser.exit(
+                1, f"Kaggle returned HTTP {error.code}. Download events.csv from its page.\n"
+            )
+        except URLError as error:
+            parser.exit(1, f"Kaggle connection failed: {error.reason}. Check network access.\n")
+        except (ValueError, OSError) as error:
+            parser.exit(1, f"Download failed: {error}\n")
+        return
     if args.command == "generate":
         generate_events(args.output, args.rows, args.seed)
         print(json.dumps({"synthetic_rows": args.rows, "output": args.output}))
