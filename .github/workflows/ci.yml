@@ -1,0 +1,45 @@
+name: Analytics quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SPARK_LOCAL_IP: 127.0.0.1
+      SPARK_IVY_DIR: /tmp/ecommerce-spark-ivy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Fetch and verify Delta JVM artifacts
+        run: |
+          jars=$(python scripts/fetch_delta_jars.py --directory /tmp/ecommerce-delta-jars)
+          echo "SPARK_DELTA_JARS=$jars" >> "$GITHUB_ENV"
+      - name: Lint
+        run: ruff check .
+      - name: Transformation contracts and Delta integration tests
+        run: pytest -q --junitxml=artifacts/pytest.xml
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: artifacts/pytest.xml
+          if-no-files-found: ignore

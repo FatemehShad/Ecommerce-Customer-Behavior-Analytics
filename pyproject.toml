@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=75,<81"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ecommerce-customer-analytics"
+version = "0.1.0"
+description = "Batch customer journey analytics with PySpark, Delta Lake, SQL, and data quality checks"
+requires-python = ">=3.10,<3.14"
+dependencies = ["pyspark==4.0.1", "delta-spark==4.0.1"]
+
+[project.optional-dependencies]
+dev = ["pytest==8.4.2", "ruff==0.13.2"]
+
+[project.scripts]
+ecommerce-analytics = "ecommerce_analytics.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
