@@ -72,3 +72,17 @@ sessions, then all 10 notebook code cells completed with four charts. Its missin
 groups were correctly reported as unrun tests, and products below the minimum-volume
 threshold did not produce an empty ranking chart. GitHub Actions now runs this workflow
 and uploads the executed notebook; this record does not claim a completed hosted CI run.
+
+### Notebook readability revision
+
+The notebook now uses a numbered walkthrough with 18 shorter code cells, worked KPI examples,
+explicit numerators and denominators, and percentage units. Hypothesis results use a compact
+table and a plain-language conclusion; the additional weekday tests are marked optional.
+Spark terminal progress bars are disabled for notebook runs, while warnings remain visible.
+
+The revised calculations were executed on both the full synthetic lakehouse and the
+1,000-event smoke lakehouse. All 18 code cells completed in each case, with five and four
+charts respectively. The full run reproduced the earlier KPI totals, the 71,780/28,220
+visitor comparison, and the p-value of approximately 0.8503. The small-data run correctly
+reported missing groups as untested. Notebook schema validation, Ruff, and formatting checks
+passed. The underlying statistical methods and data provenance are unchanged.

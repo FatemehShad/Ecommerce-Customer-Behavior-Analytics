@@ -157,11 +157,15 @@ production cluster sizing recommendation. Generated data and Delta outputs are G
 ## Product KPI and statistical analysis notebook
 
 Open [product_kpis_and_conversion.ipynb](notebooks/product_kpis_and_conversion.ipynb) in Jupyter
-or VS Code. It contains KPI definitions and a scorecard, funnel losses, daily conversion trends,
-product cart abandonment rankings, first/returning visitor and product-breadth segments,
-Wilson confidence intervals, a weekend/weekday conversion hypothesis, and exploratory weekday
+or VS Code. Follow its numbered steps from loading data to interpreting results. Short code
+cells explain each calculation, KPI tables show their numerators and denominators, and rates
+are displayed as percentages. It contains KPI definitions and a scorecard, funnel losses,
+daily conversion trends, product cart abandonment rankings, and visitor segments. Statistical
+analysis includes Wilson confidence intervals, a weekend/weekday conversion hypothesis, and weekday
 comparisons with Holm correction. The committed notebook includes five charts and executed
 **synthetic** example outputs, with the input source displayed throughout.
+The hypothesis results include a plain-language interpretation, with a final reference table
+for the statistical methods.
 
 Inference uses one eligible viewed session per anonymous visitor, selected with a fixed,
 outcome-independent hash rule. It reports effect sizes and uncertainty, chooses chi-square

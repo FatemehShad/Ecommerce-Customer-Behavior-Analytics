@@ -7,7 +7,9 @@ from delta import configure_spark_with_delta_pip
 from pyspark.sql import SparkSession
 
 
-def local_spark(master: str = "local[2]", shuffle_partitions: int = 8) -> SparkSession:
+def local_spark(
+    master: str = "local[2]", shuffle_partitions: int = 8, show_progress: bool = True
+) -> SparkSession:
     cache = Path(os.environ.get("SPARK_IVY_DIR", "/tmp/ecommerce-spark-ivy"))
     builder = (
         SparkSession.builder.appName("ecommerce-customer-analytics")
@@ -21,6 +23,7 @@ def local_spark(master: str = "local[2]", shuffle_partitions: int = 8) -> SparkS
         .config("spark.jars.ivy", str(cache))
         .config("spark.jars.repositories", "https://repo.maven.apache.org/maven2")
         .config("spark.ui.enabled", "false")
+        .config("spark.ui.showConsoleProgress", str(show_progress).lower())
     )
     jars = os.environ.get("SPARK_DELTA_JARS")
     if jars:
