@@ -48,3 +48,27 @@ The session boundary calculation now retains timestamp precision: exactly 30 min
 in a session, while 30 minutes plus one millisecond starts another. The regression fixture
 checks both cases. Real-data execution remains pending network access to `www.kaggle.com`
 and Kaggle download storage at `storage.googleapis.com`.
+
+## Product KPI notebook — 14 October 2026
+
+`notebooks/product_kpis_and_conversion.ipynb` was executed on the retained 2,700,000-event
+synthetic lakehouse. All 10 code cells completed and five charts were embedded. The notebook
+defines KPI denominators, analyses session/product funnel losses, segments observed visitor
+behaviour, and reports visitor-level conversion confidence intervals and hypothesis tests.
+
+The primary timing comparison used one reproducibly sampled eligible session per visitor:
+71,780 weekday visitors and 28,220 weekend visitors. The synthetic example's two-sided
+chi-square p-value was approximately 0.8503, with a weekend-minus-weekday difference of
+approximately 0.05 percentage points (95% interval approximately −0.43 to 0.53 percentage
+points). All six exploratory day comparisons completed with Holm correction. These are
+demonstration results, not Retailrocket business findings or randomized experiment results.
+
+The complete test suite reported **15 passed, zero failed or skipped** with the notebook
+extra installed. Tests cover Wilson intervals, effect direction, sparse exact tests,
+degenerate outcomes, and empty groups alongside the existing pipeline checks. Ruff passed.
+
+The CI smoke workflow was also exercised locally: 1,000 synthetic events produced 669
+sessions, then all 10 notebook code cells completed with four charts. Its missing timing
+groups were correctly reported as unrun tests, and products below the minimum-volume
+threshold did not produce an empty ranking chart. GitHub Actions now runs this workflow
+and uploads the executed notebook; this record does not claim a completed hosted CI run.

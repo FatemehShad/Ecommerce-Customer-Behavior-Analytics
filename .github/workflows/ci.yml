@@ -27,7 +27,7 @@ jobs:
           distribution: temurin
           java-version: '17'
       - name: Install dependencies
-        run: python -m pip install -e '.[dev]'
+        run: python -m pip install -e '.[dev,notebooks]'
       - name: Fetch and verify Delta JVM artifacts
         run: |
           jars=$(python scripts/fetch_delta_jars.py --directory /tmp/ecommerce-delta-jars)
@@ -36,6 +36,17 @@ jobs:
         run: ruff check .
       - name: Transformation contracts and Delta integration tests
         run: pytest -q --junitxml=artifacts/pytest.xml
+      - name: Execute notebook against a small synthetic lakehouse
+        run: |
+          ecommerce-analytics generate --output data/notebook-smoke.csv --rows 1000
+          ecommerce-analytics run --input data/notebook-smoke.csv --output output/notebook-smoke
+          python -m ipykernel install --prefix "$RUNNER_TEMP/jupyter" --name ecommerce-analytics
+          JUPYTER_PATH="$RUNNER_TEMP/jupyter/share/jupyter" python scripts/execute_kpi_notebook.py --source synthetic --lakehouse output/notebook-smoke
+      - name: Upload executed notebook
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-kpi-notebook
+          path: artifacts/product_kpis.executed.ipynb
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

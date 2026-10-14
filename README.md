@@ -154,6 +154,50 @@ quality counts and summaries on the driver. Size the cluster, driver/executor me
 shuffle partitions to fit real data; the sample command is a local demonstration, not a
 production cluster sizing recommendation. Generated data and Delta outputs are Git-ignored.
 
+## Product KPI and statistical analysis notebook
+
+Open [product_kpis_and_conversion.ipynb](notebooks/product_kpis_and_conversion.ipynb) in Jupyter
+or VS Code. It contains KPI definitions and a scorecard, funnel losses, daily conversion trends,
+product cart abandonment rankings, first/returning visitor and product-breadth segments,
+Wilson confidence intervals, a weekend/weekday conversion hypothesis, and exploratory weekday
+comparisons with Holm correction. The committed notebook includes five charts and executed
+**synthetic** example outputs, with the input source displayed throughout.
+
+Inference uses one eligible viewed session per anonymous visitor, selected with a fixed,
+outcome-independent hash rule. It reports effect sizes and uncertainty, chooses chi-square
+or Fisher's exact test according to expected counts, and handles empty groups as unrun tests.
+Calendar comparisons are observational associations; there is no randomized experiment
+assignment in this dataset. Behavioural and product rankings are descriptive.
+
+Install notebook dependencies and register a kernel in your local Python environment:
+
+```bash
+python -m pip install -e '.[dev,notebooks]'
+python -m ipykernel install --user --name ecommerce-analytics --display-name 'Ecommerce Analytics'
+export PYSPARK_SUBMIT_ARGS='--driver-memory 4g pyspark-shell'
+# Requires complete Retailrocket Delta outputs from the earlier pipeline command.
+python scripts/execute_kpi_notebook.py --source retailrocket
+```
+
+The runner writes a successfully executed copy to `artifacts/product_kpis.executed.ipynb`.
+It fails when the selected source is missing; it never automatically substitutes synthetic
+data. To reproduce the demonstration after generating the synthetic lakehouse above:
+
+```bash
+python scripts/execute_kpi_notebook.py --source synthetic
+```
+
+Use `--lakehouse <directory>` to read another complete pipeline output and `--kernel <name>`
+to choose another registered kernel. For interactive execution, choose the registered kernel
+and set `ECOMMERCE_DATA_SOURCE` to `retailrocket` or `synthetic` before starting it; the default
+is `retailrocket`. `ECOMMERCE_OUTPUT_PATH` optionally overrides the corresponding output path.
+Keep the source label consistent with the actual files. Spark processes the full event data;
+Pandas receives only bounded product/segment aggregates and the daily summary.
+
+The statistical helper tests require `.[notebooks]`; they are skipped when that optional extra
+is absent. CI installs both extras, runs all tests, executes the notebook on a small synthetic
+lakehouse, and uploads that executed notebook as an artifact.
+
 ## Databricks
 
 1. Build a wheel: `python -m pip wheel --no-deps . -w dist`.
