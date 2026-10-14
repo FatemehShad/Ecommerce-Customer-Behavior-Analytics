@@ -29,7 +29,7 @@ No real Retailrocket customer behaviour or revenue findings are claimed. The Dat
 the same Python transformations, but execution in a Databricks workspace was not tested.
 GitHub Actions is configured; this record does not assert a completed hosted CI run.
 
-Reproduce the full workload with the commands in README.md. Run
+Reproduce the full workload with the commands in the [setup guide](usage.md). Run
 `python scripts/validate_outputs.py --output output/synthetic-2700000 --expected-valid-rows 2700000`
 to verify curated quality, reconcile session counts, check funnel stage consistency, and
 execute all three SQL analysis examples against the generated Delta tables.
